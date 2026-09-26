@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Resale Price Checker</title>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    max-width: 480px;
+    margin: 60px auto;
+    padding: 0 20px;
+    background: #14151a;
+    color: #e8e8ea;
+  }
+
+  .card {
+    background: #1d1e24;
+    padding: 32px;
+    border-radius: 12px;
+    border: 1px solid #2a2b32;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+
+  h1 {
+    font-size: 24px;
+    margin: 0 0 6px 0;
+    letter-spacing: -0.3px;
+    color: #f5f5f7;
+  }
+
+  .subtitle {
+    color: #8a8b95;
+    font-size: 14px;
+    margin-bottom: 28px;
+  }
+
+  label {
+    display: block;
+    margin-top: 18px;
+    font-weight: 600;
+    font-size: 13px;
+    color: #a5a6b0;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 10px 12px;
+    margin-top: 6px;
+    border: 1px solid #33343c;
+    border-radius: 8px;
+    font-size: 15px;
+    background: #24252c;
+    color: #e8e8ea;
+    transition: border-color 0.15s ease;
+  }
+
+  input:focus, select:focus {
+    outline: none;
+    border-color: #6c7aff;
+    background: #26272f;
+  }
+
+  select option {
+    background: #24252c;
+    color: #e8e8ea;
+  }
+
+  button {
+    width: 100%;
+    margin-top: 26px;
+    padding: 13px 20px;
+    background: #6c7aff;
+    color: #14151a;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  button:hover {
+    background: #8791ff;
+  }
+
+  button:active {
+    transform: scale(0.99);
+  }
+
+  #result {
+    margin-top: 24px;
+    padding: 20px;
+    background: #1a2b22;
+    border: 1px solid #2c4636;
+    border-radius: 10px;
+    display: none;
+  }
+
+  .label-small {
+    font-size: 12px;
+    color: #6fd897;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+
+  .range {
+    font-size: 30px;
+    font-weight: 700;
+    margin: 6px 0 8px 0;
+    color: #9ff0bd;
+  }
+
+  #rangeText {
+    font-size: 14px;
+    color: #7fae8f;
+  }
+
+  .loading {
+    display: none;
+    text-align: center;
+    margin-top: 18px;
+    color: #6c6d78;
+    font-size: 14px;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h1>Is Your Bicycle Priced Fairly?</h1>
+  <p class="subtitle">Enter your bike's details to get a data-backed price estimate.</p>
+
+  <label>Brand</label>
+  <select id="brand">
+    <option>Hero</option><option>Hercules</option><option>Firefox</option>
+    <option>BTwin</option><option>BSA</option><option>Leader</option>
+    <option>HRX</option><option>Atlas</option><option>Other Brands</option>
+  </select>
+
+  <label>City</label>
+  <input type="text" id="city" placeholder="e.g. Ahmedabad">
+
+  <label>Condition</label>
+  <select id="condition">
+    <option value="3">Excellent / Like New</option>
+    <option value="2">Good</option>
+    <option value="1">Fair</option>
+    <option value="0">Not Sure</option>
+  </select>
+
+  <label>Number of Photos</label>
+  <input type="number" id="images" value="3" min="0">
+
+  <button onclick="getPrediction()">Check Fair Price</button>
+
+  <div class="loading" id="loading">Calculating...</div>
+
+  <div id="result">
+    <div class="label-small">Suggested Price</div>
+    <div class="range" id="predicted"></div>
+    <div id="rangeText"></div>
+  </div>
+</div>
+
+<script>
+async function getPrediction() {
+  const loading = document.getElementById("loading");
+  const result = document.getElementById("result");
+
+  result.style.display = "none";
+  loading.style.display = "block";
+
+  const payload = {
+    brand: document.getElementById("brand").value,
+    city: document.getElementById("city").value,
+    condition_score: parseInt(document.getElementById("condition").value),
+    image_count: parseInt(document.getElementById("images").value),
+    is_elite_seller: false
+  };
+
+  try {
+    const res = await fetch("http://127.0.0.1:5000/predict", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    loading.style.display = "none";
+    result.style.display = "block";
+    document.getElementById("predicted").innerText = "₹" + data.predicted_price.toLocaleString("en-IN");
+    document.getElementById("rangeText").innerText =
+      `Fair range: ₹${data.price_range_low.toLocaleString("en-IN")} – ₹${data.price_range_high.toLocaleString("en-IN")} (${data.confidence} confidence)`;
+  } catch (err) {
+    loading.style.display = "none";
+    alert("Something went wrong — check that the API server is running.");
+  }
+}
+</script>
+
+</body>
+</html>
