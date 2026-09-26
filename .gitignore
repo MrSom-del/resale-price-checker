@@ -1,0 +1,9 @@
+venv/
+__pycache__/
+*.pyc
+app_data.json
+all_listings_raw.json
+checker.py
+checking.py
+primary.py
+listings.csv
