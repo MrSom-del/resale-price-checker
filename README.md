@@ -3,8 +3,8 @@
 A tool that estimates a fair resale price range for used bicycles, built to solve a real problem: sellers and buyers on campus/local resale groups have no reliable way to know if a price is fair.
 
 ## Live Demo
-- Frontend: [link once deployed]
-- API: [link once deployed]
+- Frontend: https://resale-price-checker.netlify.app/
+- API: https://resale-price-checker.onrender.com
 
 ## What It Does
 Given a bicycle's brand, city, condition, and photo count, the tool returns a fair price estimate along with an 80% confidence range — not just a single number — based on real listing data scraped from OLX.
